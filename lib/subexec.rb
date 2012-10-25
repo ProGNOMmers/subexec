@@ -34,7 +34,8 @@ class Subexec
                 :output,
                 :exitstatus,
                 :timeout,
-                :log_file
+                :stdout,
+                :stderr
 
   def self.run(command, options={})
     sub = new(command, options)
@@ -46,7 +47,8 @@ class Subexec
     self.command    = command
     self.lang       = options[:lang]      || "C"
     self.timeout    = options[:timeout]   || -1     # default is to never timeout
-    self.log_file   = options[:log_file]
+    self.stdout     = options[:stdout]
+    self.stderr     = options[:stderr]
     self.exitstatus = 0
   end
   
@@ -64,12 +66,10 @@ class Subexec
     def spawn
       # TODO: weak implementation for log_file support.
       # Ideally, the data would be piped through to both descriptors
-      r, w = IO.pipe      
-      if !log_file.nil?
-        self.pid = Process.spawn({'LANG' => self.lang}, command, [:out, :err] => [log_file, 'a'])
-      else
-        self.pid = Process.spawn({'LANG' => self.lang}, command, STDERR=>w, STDOUT=>w)
-      end
+      r, w = IO.pipe
+
+      self.pid = Process.spawn({'LANG' => self.lang}, command, :out => (self.stdout || w), :err => (self.stderr || w) )
+
       w.close
       
       @timer = Time.now + timeout

@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'tempfile'
 
 describe Subexec do
   context 'Subexec class' do
@@ -38,19 +39,43 @@ describe Subexec do
       sub.output.should == "C\n"
     end
 
-    it 'can pass a log_file' do
-      if RUBY_VERSION >= '1.9'
-        require 'tempfile'
-        log_file = Tempfile.new('foo')
-      
-        sub = Subexec.run "#{TEST_PROG} 1", :log_file => log_file.path
-        sub.output.should == ''
-        sub.exitstatus.should == 0
-      
-        log_file.read.should == "Hello\nWorld\n"
-        log_file.close
-        log_file.unlink
+    if RUBY_VERSION >= '1.9'
+
+      context 'stdout and stderr' do
+
+        let(:tempfile) { Tempfile.new '' }
+
+        after do
+          tempfile.close
+          tempfile.unlink
+        end
+
+        it 'manages stdout on a file' do
+          sub = Subexec.run STDOUT_AND_STDERR_SH, :stdout => [tempfile.path, 'a']
+          sub.output.should == "stderr\n"
+          sub.exitstatus.should == 0
+        
+          tempfile.read.should == "stdout\n"
+        end
+
+        it 'manages stderr on a file' do
+          sub = Subexec.run STDOUT_AND_STDERR_SH, :stderr => [tempfile.path, 'a']
+          sub.output.should == "stdout\n"
+          sub.exitstatus.should == 0
+        
+          tempfile.read.should == "stderr\n"
+        end
+
+        it 'manages stdout and stderr on the same file' do
+          sub = Subexec.run STDOUT_AND_STDERR_SH, :stdout => [tempfile.path, 'a'], :stderr => [tempfile.path, 'a']
+          sub.output.should == ''
+          sub.exitstatus.should == 0
+        
+          tempfile.read.should == "stdout\nstderr\n"
+        end
+
       end
+
     end
     
   end  

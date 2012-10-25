@@ -25,3 +25,4 @@ RSpec.configure do |config|
 end
 
 TEST_PROG = File.join(File.dirname(__FILE__), 'helloworld.sh')
+STDOUT_AND_STDERR_SH = File.join(File.dirname(__FILE__), 'stdout_and_stderr.sh')
