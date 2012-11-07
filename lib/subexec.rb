@@ -30,6 +30,7 @@ class Subexec
 
   attr_accessor :pid,
                 :command,
+                :sh_vars,
                 :lang,
                 :output,
                 :exitstatus,
@@ -46,6 +47,7 @@ class Subexec
   def initialize(command, options={})
     self.command    = command
     self.lang       = options[:lang]      || "C"
+    self.sh_vars    = (options[:sh_vars] || {}).merge({ 'LANG' => self.lang })
     self.timeout    = options[:timeout]   || -1     # default is to never timeout
     self.stdout     = options[:stdout]
     self.stderr     = options[:stderr]
@@ -68,7 +70,7 @@ class Subexec
       # Ideally, the data would be piped through to both descriptors
       r, w = IO.pipe
 
-      self.pid = Process.spawn({'LANG' => self.lang}, command, :out => (self.stdout || w), :err => (self.stderr || w) )
+      self.pid = Process.spawn(sh_vars, command, :out => (self.stdout || w), :err => (self.stderr || w) )
 
       w.close
       
