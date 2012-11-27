@@ -46,9 +46,9 @@ class Subexec
   
   def initialize(command, options={})
     self.command    = command
-    self.lang       = options[:lang]      || "C"
+    self.lang       = options[:lang] || "C"
     self.sh_vars    = (options[:sh_vars] || {}).merge({ 'LANG' => self.lang })
-    self.timeout    = options[:timeout]   || -1     # default is to never timeout
+    self.timeout    = options[:timeout] || -1 # default is to never timeout
     self.stdout     = options[:stdout]
     self.stderr     = options[:stderr]
     self.exitstatus = 0
@@ -59,7 +59,6 @@ class Subexec
   else
     def run!; exec; end
   end
-
 
   private
   
