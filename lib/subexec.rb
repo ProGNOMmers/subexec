@@ -54,12 +54,10 @@ class Subexec
     self.exitstatus = 0
   end
   
-  def run!
-    if RUBY_VERSION >= '1.9' && RUBY_ENGINE != 'jruby'
-      spawn
-    else
-      exec
-    end
+  if RUBY_VERSION >= '1.9' && RUBY_ENGINE != 'jruby'
+    def run!; spawn; end
+  else
+    def run!; exec; end
   end
 
 
